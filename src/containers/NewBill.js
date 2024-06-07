@@ -17,12 +17,32 @@ export default class NewBill {
   }
   handleChangeFile = e => {
     e.preventDefault()
-    const file = this.document.querySelector(`input[data-testid="file"]`).files[0]
+    const fileInput = this.document.querySelector(`input[data-testid="file"]`);
+    const file = fileInput.files[0];
     const filePath = e.target.value.split(/\\/g)
     const fileName = filePath[filePath.length-1]
     const formData = new FormData()
     const email = JSON.parse(localStorage.getItem("user")).email
-    formData.append('file', file)
+
+    const allowedFileTypes = ["image/jpg", "image/jpeg", "image/png"];
+    let errorMessage = this.document.querySelector('.error-message');
+
+    if (!errorMessage) {
+      errorMessage = document.createElement('p');
+      errorMessage.textContent = 'Veuillez sélectionner une image au format jpg, jpeg ou png';
+      errorMessage.classList.add('error-message');
+      errorMessage.style.display = 'none';
+      fileInput.parentNode.appendChild(errorMessage);
+    }
+
+    if (allowedFileTypes.includes(file.type)) {
+      formData.append('file', file);
+      errorMessage.style.display = 'none';
+    } else {
+      fileInput.value = '';
+      errorMessage.style.display = 'block'; 
+    }
+
     formData.append('email', email)
 
     this.store
