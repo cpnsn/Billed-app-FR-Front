@@ -5,13 +5,15 @@
 import LoginUI from "../views/LoginUI";
 import Login from "../containers/Login.js";
 import { ROUTES } from "../constants/routes";
-import { fireEvent, screen } from "@testing-library/dom";
+import { fireEvent, screen, waitFor } from "@testing-library/dom";
 
 describe("Given that I am a user on login page", () => {
-  describe("When I do not fill fields and I click on employee button Login In", () => {
-    test("Then It should renders Login page", () => {
-      document.body.innerHTML = LoginUI();
+  beforeEach(() => {
+    document.body.innerHTML = LoginUI();
+  });
 
+  describe("When I do not fill fields and I click on employee button Login In", () => {
+    test("Then It should render Login page", () => {
       const inputEmailUser = screen.getByTestId("employee-email-input");
       expect(inputEmailUser.value).toBe("");
 
@@ -23,14 +25,12 @@ describe("Given that I am a user on login page", () => {
 
       form.addEventListener("submit", handleSubmit);
       fireEvent.submit(form);
-      expect(screen.getByTestId("form-employee")).toBeTruthy();
+            expect(screen.getByTestId("form-employee")).toBeTruthy();
     });
   });
 
   describe("When I do fill fields in incorrect format and I click on employee button Login In", () => {
-    test("Then It should renders Login page", () => {
-      document.body.innerHTML = LoginUI();
-
+    test("Then It should render Login page", () => {
       const inputEmailUser = screen.getByTestId("employee-email-input");
       fireEvent.change(inputEmailUser, { target: { value: "pasunemail" } });
       expect(inputEmailUser.value).toBe("pasunemail");
@@ -50,7 +50,6 @@ describe("Given that I am a user on login page", () => {
 
   describe("When I do fill fields in correct format and I click on employee button Login In", () => {
     test("Then I should be identified as an Employee in app", () => {
-      document.body.innerHTML = LoginUI();
       const inputData = {
         email: "johndoe@email.com",
         password: "azerty",
@@ -111,7 +110,7 @@ describe("Given that I am a user on login page", () => {
       );
     });
 
-    test("It should renders Bills page", () => {
+    test("It should render Bills page", () => {
       expect(screen.getAllByText("Mes notes de frais")).toBeTruthy();
     });
   });
@@ -119,9 +118,7 @@ describe("Given that I am a user on login page", () => {
 
 describe("Given that I am a user on login page", () => {
   describe("When I do not fill fields and I click on admin button Login In", () => {
-    test("Then It should renders Login page", () => {
-      document.body.innerHTML = LoginUI();
-
+    test("Then It should render Login page", () => {
       const inputEmailUser = screen.getByTestId("admin-email-input");
       expect(inputEmailUser.value).toBe("");
 
@@ -138,9 +135,7 @@ describe("Given that I am a user on login page", () => {
   });
 
   describe("When I do fill fields in incorrect format and I click on admin button Login In", () => {
-    test("Then it should renders Login page", () => {
-      document.body.innerHTML = LoginUI();
-
+    test("Then it should render Login page", () => {
       const inputEmailUser = screen.getByTestId("admin-email-input");
       fireEvent.change(inputEmailUser, { target: { value: "pasunemail" } });
       expect(inputEmailUser.value).toBe("pasunemail");
@@ -159,8 +154,7 @@ describe("Given that I am a user on login page", () => {
   });
 
   describe("When I do fill fields in correct format and I click on admin button Login In", () => {
-    test("Then I should be identified as an HR admin in app", () => {
-      document.body.innerHTML = LoginUI();
+    test("Then I should be identified as an HR admin in app", async () => {
       const inputData = {
         type: "Admin",
         email: "johndoe@email.com",
@@ -196,7 +190,11 @@ describe("Given that I am a user on login page", () => {
 
       let PREVIOUS_LOCATION = "";
 
-      const store = jest.fn();
+      const store = {
+        login: jest.fn().mockResolvedValue({ jwt: "jwt-token" }),
+        users: jest.fn().mockReturnThis(),
+        create: jest.fn().mockResolvedValue({}),
+      };
 
       const login = new Login({
         document,
@@ -207,11 +205,10 @@ describe("Given that I am a user on login page", () => {
       });
 
       const handleSubmit = jest.fn(login.handleSubmitAdmin);
-      login.login = jest.fn().mockResolvedValue({});
       form.addEventListener("submit", handleSubmit);
       fireEvent.submit(form);
-      expect(handleSubmit).toHaveBeenCalled();
-      expect(window.localStorage.setItem).toHaveBeenCalled();
+
+      await waitFor(() => expect(handleSubmit).toHaveBeenCalled());
       expect(window.localStorage.setItem).toHaveBeenCalledWith(
         "user",
         JSON.stringify({
@@ -223,7 +220,7 @@ describe("Given that I am a user on login page", () => {
       );
     });
 
-    test("It should renders HR dashboard page", () => {
+    test("It should render HR dashboard page", () => {
       expect(screen.queryByText("Validations")).toBeTruthy();
     });
   });
