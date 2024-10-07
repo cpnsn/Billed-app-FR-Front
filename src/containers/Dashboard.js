@@ -131,6 +131,7 @@ export default class {
   }
 
   handleShowTickets(e, bills, index) {
+    
     bills.forEach(bill => {
         $(`#open-bill${bill.id}`).off('click');
     });
@@ -154,7 +155,6 @@ export default class {
     })
 
     return bills
-    
 }
 
   getBillsAllUsers = () => {

@@ -37,7 +37,6 @@ describe("Given I am connected as an employee", () => {
       const windowIcon = screen.getByTestId('icon-window')
       //to-do write expect expression
       expect(windowIcon).toHaveClass('active-icon')
-
     })
     test("Then bills should be ordered from earliest to latest", () => {
       document.body.innerHTML = BillsUI({ data: bills })
@@ -59,7 +58,7 @@ describe("Given I am connected as an employee", () => {
       }
 
       const billsDashboard = new Bills({
-        document, onNavigate, store: null, bills: bills, localStorage: window.localStorage,
+        document, onNavigate, store: null, localStorage: window.localStorage,
       });
       const handleClickNewBill = jest.fn(billsDashboard.handleClickNewBill)
       newBillBtn.addEventListener("click", handleClickNewBill)
@@ -77,13 +76,13 @@ describe("Given I am connected as an employee", () => {
       };
 
       const billsDashboard = new Bills({
-        document, onNavigate, store: null, bills: bills, localStorage: window.localStorage,
+        document, onNavigate, store: null, localStorage: window.localStorage,
       });
 
       $.fn.modal = jest.fn();
-      document.body.innerHTML = BillsUI({ data: { bills } });
+      document.body.innerHTML = BillsUI({ data: bills });
 
-      const iconEye = screen.getAllByTestId("btn-new-bill")[0];
+      const iconEye = screen.getAllByTestId("icon-eye")[0];
       const handleClickIconEye = jest.fn(
         billsDashboard.handleClickIconEye(iconEye)
       );
@@ -98,8 +97,10 @@ describe("Given I am connected as an employee", () => {
 
   // test d'intégration GET
   describe("When I navigate to Bills Page", () => {
-    test("fetches bills from mock API GET", async () => {
+    beforeEach(() => {
       jest.spyOn(mockStore, "bills");
+    });
+    test("fetches bills from mock API GET", async () => {
       window.onNavigate(ROUTES_PATH.Bills);
       await waitFor(() => screen.getByText("Mes notes de frais"));
       const newBillBtn = screen.getByTestId("btn-new-bill");
@@ -108,19 +109,6 @@ describe("Given I am connected as an employee", () => {
     });
 
     describe("When an error occurs on API", () => {
-      beforeEach(() => {
-        jest.spyOn(mockStore, "bills");
-        Object.defineProperty(window, 'localStorage', { value: localStorageMock });
-        localStorage.setItem('user', JSON.stringify({ 
-          type: 'Employee', 
-          email: 'a@a' 
-        }));
-        const root = document.createElement("div");
-        root.setAttribute("id", "root");
-        document.body.appendChild(root);
-        router();
-      });
-
       test("fetches bills from an API and fails with 404 message error", async () => {
         mockStore.bills.mockImplementationOnce(() => {
           return {
